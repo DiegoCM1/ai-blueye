@@ -15,7 +15,11 @@ app = FastAPI()
 # ✅ Allow frontend access from local + deployed portfolio
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 🔥 allow all origins (for development)
+    allow_origins=[
+        "http://localhost:8081",  # Local dev on Expo Go (web preview)
+        "exp://192.168.X.X:19000", # Expo LAN/IP connection
+        "https://your-final-web-url.com"  # If you deploy as web later
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
