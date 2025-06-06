@@ -15,15 +15,12 @@ app = FastAPI()
 # ✅ Allow frontend access from local + deployed portfolio
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://192.168.1.8:1287",
-        "https://diegocm2025-portfolio.vercel.app",
-    ],
+    allow_origins=["*"],  # 🔥 allow all origins (for development)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 # ✅ Define expected request schema
