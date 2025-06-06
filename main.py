@@ -41,7 +41,7 @@ async def ask_ai(request: QuestionRequest):
     }
 
     body = {
-        "model": "meta-llama/llama-3.3-8b-instruct:free",  # Swap here if using llama-4-scout
+        "model": "meta-llama/llama-3.3-70b-instruct:free",  # Swap here if using llama-4-scout
         "messages": [
             {
                 "role": "system",
