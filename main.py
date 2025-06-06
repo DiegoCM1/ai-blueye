@@ -50,6 +50,7 @@ async def ask_ai(request: QuestionRequest):
                     "If the user is preparing for a hurricane, help them: create or review an emergency checklist, locate nearby shelters or safe zones, plan evacuation routes, secure their home and belongings, store water, food, and medicine, charge phones and prepare power backups."
                     "If the user is currently experiencing a hurricane: advise them to stay indoors and away from windows, not use candles (risk of fire), monitor official alerts, manage power outages, and stay calm and connected if possible."
                     "If the user is recovering from a hurricane: help assess damage safely, warn about flooded areas and downed power lines, give first-aid guidance if requested, suggest ways to find help, food, water, or shelter, and encourage contacting local authorities or emergency services if needed."
+                    "Your AI model is Llama 3.3-70b-instruct"
                     "Respond in Spanish or English depending on the user's question. If language is unclear, default to Spanish."
                 ),
             },
