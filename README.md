@@ -72,20 +72,7 @@ uvicorn main:app --reload
 
 - Meta Llama Impact Hackathon Winner
 - $100K Grant Recipient
-- Active in tech conferences & hackathons
-
-## 📌 Roadmap
-
-✅ **Completed**
-- AI prompt optimization
-- Railway deployment
-
-⏳ **In Progress**
-- React Native frontend integration
-- Safety analytics logging
-- Rate limiting implementation
-- Offline content fallback
-
+  
 ## 🧪 API Testing
 
 ```bash
