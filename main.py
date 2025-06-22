@@ -18,7 +18,6 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:8081",  # Local dev on Expo Go (web preview)
         "exp://192.168.X.X:19000", # Expo LAN/IP connection
-        "https://your-final-web-url.com"  # If you deploy as web later
     ],
     allow_credentials=True,
     allow_methods=["*"],
