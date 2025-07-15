@@ -3,6 +3,7 @@ from pydantic import BaseModel
 import httpx
 from dotenv import load_dotenv
 import os
+import os.path
 from fastapi.middleware.cors import CORSMiddleware
 import aiosqlite
 
@@ -27,7 +28,8 @@ app.add_middleware(
 
 
 # ✅ Database initialization
-DB_PATH = "prompts.db"
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                       "prompts.db")
 
 
 @app.on_event("startup")
