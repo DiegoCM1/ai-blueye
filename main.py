@@ -39,6 +39,7 @@ async def startup() -> None:
         CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT,
+            answer TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
@@ -89,11 +90,12 @@ async def ask_ai(request: QuestionRequest):
 
     try:
         # ✅ Store the user's question before making the API call
-        await app.state.db.execute(
+        cursor = await app.state.db.execute(
             "INSERT INTO prompts (question) VALUES (?)",
             (request.question,),
         )
         await app.state.db.commit()
+        prompt_id = cursor.lastrowid
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -109,6 +111,11 @@ async def ask_ai(request: QuestionRequest):
 
         if "choices" in result:
             ai_reply = result["choices"][0]["message"]["content"]
+            await app.state.db.execute(
+                "UPDATE prompts SET answer = ? WHERE id = ?",
+                (ai_reply, prompt_id),
+            )
+            await app.state.db.commit()
             return {"response": ai_reply}
         else:
             raise HTTPException(
