@@ -4,6 +4,7 @@ import httpx
 from dotenv import load_dotenv
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import aiosqlite
 
 # ✅ Load environment variables
 load_dotenv()
@@ -23,6 +24,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # ✅ Database initialization
 DB_PATH = "prompts.db"
@@ -48,8 +50,6 @@ async def startup() -> None:
 async def shutdown() -> None:
     """Close the database connection on shutdown."""
     await app.state.db.close()
-
-
 
 
 
@@ -94,7 +94,6 @@ async def ask_ai(request: QuestionRequest):
             (request.question,),
         )
         await app.state.db.commit()
-
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
