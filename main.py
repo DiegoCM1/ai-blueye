@@ -17,12 +17,39 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8081",  # Local dev on Expo Go (web preview)
-        "exp://192.168.X.X:19000", # Expo LAN/IP connection
+        "exp://192.168.1.8:8081"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ✅ Database initialization
+DB_PATH = "prompts.db"
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    """Create the database connection and table on startup."""
+    app.state.db = await aiosqlite.connect(DB_PATH)
+    await app.state.db.execute(
+        """
+        CREATE TABLE IF NOT EXISTS prompts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    await app.state.db.commit()
+
+
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    """Close the database connection on shutdown."""
+    await app.state.db.close()
+
+
 
 
 
@@ -61,6 +88,14 @@ async def ask_ai(request: QuestionRequest):
     }
 
     try:
+        # ✅ Store the user's question before making the API call
+        await app.state.db.execute(
+            "INSERT INTO prompts (question) VALUES (?)",
+            (request.question,),
+        )
+        await app.state.db.commit()
+
+
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
