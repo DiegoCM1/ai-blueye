@@ -40,7 +40,8 @@ def test_ask_endpoint(tmp_path):
 
     # verify question and answer stored in database
     conn = sqlite3.connect(main.DB_PATH)
-    row = conn.execute("SELECT question, answer FROM prompts").fetchone()
+    row = conn.execute("SELECT question, answer, user FROM prompts").fetchone()
     conn.close()
     assert row[0] == "hello"
     assert row[1] == "mocked"
+    assert row[2] == "testclient"

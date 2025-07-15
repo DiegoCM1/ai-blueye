@@ -26,6 +26,8 @@ An award-winning AI-powered hurricane safety assistant built with **FastAPI** an
 - 🤖 **Advanced AI Models**
   - LLaMA 3.3 8B Instruct
   - LLaMA 4 Scout
+- 📝 **Prompt Logging**
+  - Stores questions, AI answers, and client IP addresses in SQLite
 
 ## 🛠️ Technologies
 

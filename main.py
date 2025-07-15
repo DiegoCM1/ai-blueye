@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 import httpx
 from dotenv import load_dotenv
@@ -40,16 +40,19 @@ async def startup() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT,
             answer TEXT,
+            user TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
     )
 
-  # ✅ Handle existing databases missing the 'answer' column
+    # ✅ Handle existing databases missing the 'answer' or 'user' columns
     cursor = await app.state.db.execute("PRAGMA table_info(prompts)")
     columns = [info[1] for info in await cursor.fetchall()]
     if "answer" not in columns:
         await app.state.db.execute("ALTER TABLE prompts ADD COLUMN answer TEXT")
+    if "user" not in columns:
+        await app.state.db.execute("ALTER TABLE prompts ADD COLUMN user TEXT")
     await app.state.db.commit()
 
 
@@ -66,7 +69,7 @@ class QuestionRequest(BaseModel):
 
 # ✅ Define the /ask endpoint
 @app.post("/ask")
-async def ask_ai(request: QuestionRequest):
+async def ask_ai(payload: QuestionRequest, request: Request):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -89,15 +92,16 @@ async def ask_ai(request: QuestionRequest):
                     "Your answers should be concise, practical, and focused on safety. Avoid unnecessary details or unrelated topics."
                 ),
             },
-            {"role": "user", "content": request.question},
+            {"role": "user", "content": payload.question},
         ],
     }
 
     try:
-        # ✅ Store the user's question before making the API call
+        # ✅ Store the user's question and IP before making the API call
+        user_ip = request.client.host if request.client else "unknown"
         cursor = await app.state.db.execute(
-            "INSERT INTO prompts (question) VALUES (?)",
-            (request.question,),
+            "INSERT INTO prompts (question, user) VALUES (?, ?)",
+            (payload.question, user_ip),
         )
         
         prompt_id = cursor.lastrowid
