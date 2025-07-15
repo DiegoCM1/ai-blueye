@@ -18,7 +18,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8081",  # Local dev on Expo Go (web preview)
-        "exp://192.168.1.8:8081"
+        "exp://192.168.1.8:8081",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -39,10 +39,17 @@ async def startup() -> None:
         CREATE TABLE IF NOT EXISTS prompts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             question TEXT,
+            answer TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """
     )
+
+  # ✅ Handle existing databases missing the 'answer' column
+    cursor = await app.state.db.execute("PRAGMA table_info(prompts)")
+    columns = [info[1] for info in await cursor.fetchall()]
+    if "answer" not in columns:
+        await app.state.db.execute("ALTER TABLE prompts ADD COLUMN answer TEXT")
     await app.state.db.commit()
 
 
@@ -50,7 +57,6 @@ async def startup() -> None:
 async def shutdown() -> None:
     """Close the database connection on shutdown."""
     await app.state.db.close()
-
 
 
 # ✅ Define expected request schema
@@ -89,10 +95,12 @@ async def ask_ai(request: QuestionRequest):
 
     try:
         # ✅ Store the user's question before making the API call
-        await app.state.db.execute(
+        cursor = await app.state.db.execute(
             "INSERT INTO prompts (question) VALUES (?)",
             (request.question,),
         )
+        
+        prompt_id = cursor.lastrowid
         await app.state.db.commit()
 
         async with httpx.AsyncClient() as client:
@@ -109,6 +117,12 @@ async def ask_ai(request: QuestionRequest):
 
         if "choices" in result:
             ai_reply = result["choices"][0]["message"]["content"]
+            print("AI response:", ai_reply)
+            await app.state.db.execute(
+                "UPDATE prompts SET answer = ? WHERE id = ?",
+                (ai_reply, prompt_id),
+            )
+            await app.state.db.commit()
             return {"response": ai_reply}
         else:
             raise HTTPException(

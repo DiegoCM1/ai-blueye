@@ -38,8 +38,9 @@ def test_ask_endpoint(tmp_path):
         assert response.status_code == 200
         assert response.json()["response"] == "mocked"
 
-    # verify question stored in database
+    # verify question and answer stored in database
     conn = sqlite3.connect(main.DB_PATH)
-    row = conn.execute("SELECT question FROM prompts").fetchone()
+    row = conn.execute("SELECT question, answer FROM prompts").fetchone()
     conn.close()
     assert row[0] == "hello"
+    assert row[1] == "mocked"
