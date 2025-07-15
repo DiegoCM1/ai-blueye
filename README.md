@@ -56,6 +56,7 @@ pip install -r requirements.txt
 ### Environment Configuration
 
 ```env
+# Copy .env.example to .env and add your key
 OPENROUTER_API_KEY=your_openrouter_key_here
 ```
 
@@ -81,13 +82,21 @@ curl -X POST https://your-backend-url/ask \
 -d "{\"question\": \"¿Qué hacer si hay alerta de huracán?\"}"
 ```
 
+### Running Tests
+
+```bash
+pytest
+```
+
 ---
 
 <div align="center">
 
 **[📝 Documentation](https://github.com/DiegoCM1/ai-blueye/wiki)** • 
-**[🐛 Issues](https://github.com/DiegoCM1/ai-blueye/issues)** • 
+**[🐛 Issues](https://github.com/DiegoCM1/ai-blueye/issues)** •
 **[📫 Contact](mailto:your-email@domain.com)**
+
+Released under the [MIT License](LICENSE).
 
 </div>
 
