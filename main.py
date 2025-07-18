@@ -28,8 +28,7 @@ app.add_middleware(
 
 
 # ✅ Database initialization
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "prompts.db")
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "prompts.db")
 
 
 @app.on_event("startup")
@@ -92,6 +91,9 @@ async def ask_ai(payload: QuestionRequest, request: Request):
                     "If the user is recovering from a hurricane: help assess damage safely, warn about flooded areas and downed power lines, give first-aid guidance if requested, suggest ways to find help, food, water, or shelter, and encourage contacting local authorities or emergency services if needed."
                     "Respond in Spanish or English depending on the user's question. If language is unclear, default to Spanish."
                     "Your answers should be concise, practical, and focused on safety. Avoid unnecessary details or unrelated topics."
+                    "Answer in the language of the user's question, but if they ask in both languages, respond in Spanish."
+                    "Answer in plain text, not code blocks, markdown, bold, italics, or any other formatting."
+                    "Be really brief with your answers, only provide the most important information. If the user asks for more details, you can provide them, but only if they ask."
                 ),
             },
             {"role": "user", "content": payload.question},
@@ -105,7 +107,7 @@ async def ask_ai(payload: QuestionRequest, request: Request):
             "INSERT INTO prompts (question, user) VALUES (?, ?)",
             (payload.question, user_ip),
         )
-        
+
         prompt_id = cursor.lastrowid
         await app.state.db.commit()
 
