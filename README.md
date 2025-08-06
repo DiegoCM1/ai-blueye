@@ -7,6 +7,7 @@
 [![Meta Grant](https://img.shields.io/badge/Meta_Grant-$100K-blue?style=for-the-badge)](https://github.com/DiegoCM1/ai-blueye)
 
 An award-winning AI-powered hurricane safety assistant built with **FastAPI** and **OpenRouter's LLMs** 
+Used in [BluEye MVP](https://github.com/DiegoCM1/MetaQuetzal)
 
 [Features](#-features) • [Setup](#%EF%B8%8F-setup) • [API Reference](#-api-reference) • [Deployment](#-deployment)
 
