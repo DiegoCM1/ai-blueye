@@ -10,6 +10,7 @@ import aiosqlite
 # ✅ Load environment variables
 load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_TIMEOUT = float(os.getenv("OPENROUTER_TIMEOUT", 30))
 
 # ✅ Initialize FastAPI app
 app = FastAPI()
@@ -166,11 +167,14 @@ Actúa con calidez humana por defecto y pasa a protocolo solo cuando el riesgo l
         prompt_id = cursor.lastrowid
         await app.state.db.commit()
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(OPENROUTER_TIMEOUT)
+        ) as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json=body,
+                timeout=httpx.Timeout(OPENROUTER_TIMEOUT),
             )
 
         result = response.json()

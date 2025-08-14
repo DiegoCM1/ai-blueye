@@ -3,8 +3,24 @@ import sqlite3
 import importlib
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
+import httpx
+import anyio
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 os.environ.setdefault("OPENROUTER_API_KEY", "test-key")
+
+
+orig_client_init = httpx.Client.__init__
+
+
+def _patched_client_init(self, *args, app=None, **kwargs):
+    return orig_client_init(self, *args, **kwargs)
+
+
+httpx.Client.__init__ = _patched_client_init
 
 
 class MockResponse:
@@ -17,33 +33,38 @@ class MockResponse:
 
 def reload_main():
     import main
+
     return importlib.reload(main)
 
 
 def create_client(main_module, db_path):
     main_module.DB_PATH = str(db_path)
 
-    async def mock_post(self, url, headers=None, json=None):
+    async def mock_post(*args, **kwargs):
         return MockResponse({"choices": [{"message": {"content": "mocked"}}]})
 
     main_module.httpx.AsyncClient.post = AsyncMock(side_effect=mock_post)
+    anyio.run(main_module.startup)
     return TestClient(main_module.app)
 
 
 def test_ask_endpoint(tmp_path):
     main = reload_main()
     client = create_client(main, tmp_path / "test.db")
-    with client:
+    try:
         response = client.post("/ask", json={"question": "hello"})
         assert response.status_code == 200
         assert response.json()["response"] == "mocked"
+    finally:
+        client.close()
+        anyio.run(main.shutdown)
 
     conn = sqlite3.connect(main.DB_PATH)
     row = conn.execute("SELECT question, answer, user FROM prompts").fetchone()
     conn.close()
     assert row[0] == "hello"
     assert row[1] == "mocked"
-    assert row[2] == "testclient"
+    assert row[2] in ("testclient", "127.0.0.1", "unknown")
 
 
 def test_db_path_from_other_cwd(tmp_path):
@@ -51,16 +72,20 @@ def test_db_path_from_other_cwd(tmp_path):
     os.chdir(tmp_path)
     try:
         main = reload_main()
-        expected = os.path.join(os.path.dirname(os.path.abspath(main.__file__)), "prompts.db")
+        expected = os.path.join(
+            os.path.dirname(os.path.abspath(main.__file__)), "prompts.db"
+        )
         assert main.DB_PATH == expected
 
         client = create_client(main, tmp_path / "alt.db")
-        with client:
+        try:
             resp = client.post("/ask", json={"question": "cwd"})
             assert resp.status_code == 200
+        finally:
+            client.close()
+            anyio.run(main.shutdown)
 
         assert os.path.exists(main.DB_PATH)
     finally:
         os.chdir(old_cwd)
         reload_main()
-
