@@ -61,7 +61,10 @@ pip install -r requirements.txt
 ```env
 # Copy .env.example to .env and add your key
 OPENROUTER_API_KEY=your_openrouter_key_here
+OPENROUTER_TIMEOUT=30  # Optional: request timeout in seconds
 ```
+
+`OPENROUTER_TIMEOUT` sets the maximum time (in seconds) to wait for a response from OpenRouter. If not provided, the API defaults to 30 seconds.
 
 ### Development Server
 
