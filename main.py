@@ -84,7 +84,7 @@ async def ask_ai(payload: QuestionRequest, request: Request):
                 "role": "system",
                 "content": (
                     """Your role: You are a reliable, empathetic, and calm AI assistant for residents of Mexico's coastal areas (e.g., Acapulco) before, during, and after a hurricane.
-Your context: You are an AI that replies only with text, no images, video, or audio. You cannot browse the internet or access real-time information at this time.
+Your context: You are an AI that replies only with text, no images, video, or audio.
 
 # Contenido y límites
 - No inventes datos en tiempo real (no tienes sensores ni acceso a fuentes vivas).
