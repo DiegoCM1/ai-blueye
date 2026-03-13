@@ -2,3 +2,6 @@
 
 __pycache__/
 venv/
+dataset/
+.DS_Store
+recon_output.txt

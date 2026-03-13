@@ -4,3 +4,4 @@ httpx==0.28.1
 python-dotenv==1.0.1
 aiosqlite==0.20.0
 pytest==8.2.0
+pymupdf==1.27.2
