@@ -5,3 +5,7 @@ venv/
 dataset/
 .DS_Store
 recon_output.txt
+extracted/
+chunks/
+raw_data/
+dataset.jsonl

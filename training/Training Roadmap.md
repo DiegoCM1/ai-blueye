@@ -51,12 +51,21 @@ VALID_CATEGORIES = [
     "post_storm_assessment",
     "infrastructure_damage",
     "communication",
-    "pets_and_animals",
+    "landslide_risk",
     "flooding",
     "electrical_safety",
     "general_knowledge"
 ]
 ```
+
+**Category Creation**
+If a chunk overlaps two categories, the teacher model will generate confused pairs that don't cleanly
+  belong to either. When you check dataset balance later, a chunk tagged flooding +                 
+during_storm_safety won't count cleanly toward either bucket.
+
+When content genuinely overlaps, apply this rule: assign the most specific category. Flooding during
+a storm → flooding, not during_storm_safety. Electrical hazard after the storm → electrical_safety,
+not post_storm_assessment.
 
 **Use** (which dataset this pair belongs to):
 ```python
@@ -154,7 +163,7 @@ RULES:
 - Rule: one category per chunk. If a section covers two topics, split it.
 
 **Step 3 — Extract and chunk PDFs**
-- Use Python (PyMuPDF or pdfplumber) to extract text from each PDF
+- Use Python (PyMuPDF) to extract text from each PDF
 - Split by section (using headers), NOT by arbitrary page/token count
 - Each chunk should be a complete, coherent topic
 - Assign one category to each chunk
